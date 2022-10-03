@@ -1,0 +1,123 @@
+---
+title: "London Weather"
+author: "Shaun Chirag Lakra"
+date: "23/06/2022"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+# Google Data Analytics Capstone Project on: *London Weather*
+
+#### Data sourced from [link](https://www.kaggle.com/datasets/emmanuelfwerr/london-weather-data?select=london_weather.csv)
+
+Removing any unnecessary saved results: 
+```{r}
+rm(list = ls())
+```
+
+Loading the Tidyverse library: 
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+Loading the Dataset: 
+```{r}
+setwd('C:/Users/Lenovo/Downloads/london_weather')
+data = read.csv("london_weather.csv")
+```
+
+Previewing our data: 
+```{r}
+head(data)
+```
+
+Loading the lubridate package to deal with date formats: 
+```{r message=FALSE, warning=FALSE}
+library(lubridate)
+```
+
+Converting the date column into proper date format:
+```{r}
+data$date = ymd(data$date)
+```
+
+We notice that data on snow depth is not available for the year 2020. Moreover, snow depth is almost negligible after the initial years. That's why we drop that column.
+```{r}
+data = data[,1:9]
+```
+
+Removing any unavailable data (if present):
+```{r}
+data_final = na.omit(data)
+```
+
+Summary of the data:
+```{r}
+data_final %>%
+  summary()
+```
+A few points to take notice of:
+
+* Data available is from 1st January, 1979 to 31st December, 2020.
+* cloud cover is measured in "Oktas".
+* sunshine is measured in "hours".
+* All temperatures are measured in degree "Celsius".
+* global radiation is measured in Watt per meter square.
+* precipitation is measured in millimeters.
+* pressure is measured in Pascal.
+
+### Main Objectives: 
+* Analyzing weather patterns in London
+* Determining the best time to visit London
+
+Before analyzing, lets mutate separate columns for year and month in the data:
+
+```{r}
+data_final = data_final %>%
+  mutate(month = month(data_final$date, label = T), year = year(data_final$date))
+```
+
+## Box plot of the mean temperature in London over the years:
+```{r}
+data_final %>%
+  ggplot(aes(month, mean_temp)) + 
+  geom_boxplot(color = 6) + 
+  labs(title = "Boxplot of monthly mean temperatures in London", subtitle = "Data collected from 1979 to 2020", caption = "The data has extreme variations in temperatures within months but an overall bell shaped trend is observed") +
+  xlab("Months") + ylab("Mean Temperatures (in Celsius)")
+```
+
+## Analyzing monthly precipitation patterns in London using a scatterplot:
+```{r}
+data_final %>%
+  ggplot(aes(month, precipitation)) + 
+  geom_point(color = 2) + 
+  labs(title = "Scatterplot of monthly precipation levels in London", subtitle = "Data collected from 1979 to 2020", caption = "There is moderate to heavy rain almost throughout the year.") +
+  xlab("Months") + ylab("Precipiation (in mm)")
+```
+
+## Analysing the sunshine pattern: 
+```{r}
+data_final %>%
+  ggplot(aes(month)) + 
+  geom_boxplot(aes(y = sunshine), color = 7) + 
+  labs(title = "Boxplot of monthly sunshine levels in London", subtitle = "Data collected from 1979 to 2020", caption = "Maximum sunshine is experienced during the months of May, June, July and August") +
+  xlab("Months") + ylab("Sunshine (in hours)")
+```
+
+## Analyzing the relationship between mean temperatures and precipitation levels in London:
+```{r}
+data_final %>%
+  ggplot(aes(mean_temp, precipitation)) + 
+  geom_point(aes(color = sunshine, alpha = 0.5)) + 
+  labs(title = "Relationship between mean temperatures and precipitation levels in London", subtitle = "Data collected from 1979 to 2020", caption = "No significant pattern is observed") +
+  xlab("Mean Temperature") + ylab("Precipiation (in mm)")
+```
+
+# Conclusion and Key Takeaways
+
+* London is a city with moderate to heavy rainfall almost throughout the year.
+* London is a cold city with an average mean temperature of 11.48 degrees Celsius.
+* Since there is no relationship between the rainfall and mean temperatures, the best time to visit London would be on months experiencing pleasant weather, that is, not too cold. Hence, the best time to visit London would be between months of May, June, July and August; July being the best month as it is not too cold and there is plentiful sunshine. 
